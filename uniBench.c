@@ -29,7 +29,8 @@
 #include "minunit.h"
 
 #define FL_EPSILON (0.00001)
-#define FL_EQUAL(FL_result,FL_expectedResult) (fabsf( (FL_result)-(FL_expectedResult) ) < FL_EPSILON)
+//#define FL_EQUAL(FL_result,FL_expectedResult) (fabsf( (FL_result)-(FL_expectedResult) ) < FL_EPSILON)
+#define FL_EQUAL(FL_result,FL_expectedResult) (fabs( (FL_result)-(FL_expectedResult) ) < FL_EPSILON)
 
 int tests_run = 0; //must be int as used by minunit.h macros
 
@@ -51,15 +52,15 @@ void dbginfo(int line, const char *file)
 
 void debug(const char *fmt, ...)
 {
-    char _debugstring[100];
-    char _vstring[100]; 
+    char _debugstring[256];
+    char _vstring[200];
     va_list argp;
     //sprintf(_debugstring, "MU_ASSERT: \"%s\", line %d: ", dbgfile, dbgline);
 	va_start(argp, fmt);
 	vsprintf(_vstring, fmt, argp);
 	va_end(argp);
 	//sprintf(_debugstring, "%s\n", _debugstring);
-	sprintf(_debugstring, "MU_ASSERT: \"%s\", line %d: . %s\n", dbgfile, dbgline, _vstring);
+	sprintf(_debugstring, "MU_ASSERT: \"%s\", line %d. %s\n", dbgfile, dbgline, _vstring);
 
 #ifdef __MWERKS__
 	debugstr(_debugstring);
