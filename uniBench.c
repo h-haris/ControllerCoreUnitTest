@@ -733,6 +733,7 @@ static char * test_030(void)
     whatSize=sizeof(whatGet);
     Status3D = Q3Controller_GetChannel(ClientController,3,&whatGet,&whatSize);//to be fixed. Results in bad access if DeviceServer is not started!
 #if 1
+    //QD3D overides the returned status of Q3Controller_GetChannel with kQ3Success
     mu_assert("error, no kQ3Success", Status3D == kQ3Success);
 #else
     mu_assert("error, still kQ3Success", Status3D == kQ3Failure);
@@ -744,7 +745,7 @@ static char * test_030(void)
     Status3D = Q3Controller_GetTrackerPosition(ClientController,&position);
     mu_assert("error, no kQ3Success", Status3D == kQ3Success);
 #if 1
-    mu_assert("error, wrong position", (position.x == 1.)&&(position.y == 1.)&&(position.z == 1.) );
+    mu_assert("error, wrong position", (position.x == 1.)&&(position.y == 1.)&&(position.z == 1.) );//deactivated controller should have no effect on returned position
 #else
     mu_assert("error, wrong position", (position.x == 0.)&&(position.y == 0.)&&(position.z == 0.) );
 #endif
@@ -864,7 +865,7 @@ static char * test_032(void)
     //channel 4 is ambitous. remember: ChannelCount==4, channels 0 to 3!
 #if 1
     mu_assert("error, no kQ3Success", Status3D == kQ3Success);
-    mu_assert("error, not whatGet == 1500", whatGet == 65000); //from default case ChannelGetMethod
+    mu_assert("error, not whatGet == 65000", whatGet == 65000); //from default case ChannelGetMethod
 #else
     mu_assert("error, still kQ3Success", Status3D == kQ3Failure);
     mu_assert("error, not whatGet == 1500", whatGet == 1500); //TBC: same as channel 3 ?!
@@ -924,7 +925,7 @@ static char * test_034(void)
 
 static char * test_035(void)
 {
-    //!controller and tracker inactive!
+    //Note: controller and tracker are both inactive!
     
     Status3D = Q3Controller_GetValueCount(ClientController,&tempUns32);
     mu_assert("error, no kQ3Success", Status3D == kQ3Success);
@@ -943,7 +944,7 @@ static char * test_035(void)
 
 static char * test_036(void)
 {
-    //!controller and tracker inactive!
+    //Note: controller and tracker are both inactive!
     
     TQ3Uns32 lastTrackerProcCalled = trackerProcCalled;
     Status3D = Q3Controller_SetButtons(DriverController,5);
@@ -975,7 +976,7 @@ static char * test_036(void)
 static char * test_037(void)
 {
     TQ3Uns32 lastTrackerProcCalled;
-    //!controller and tracker inactive!
+    //Note: controller and tracker are both inactive!
     
     TrackerSerNum = 0;
     Status3D = Q3Tracker_GetPosition(ClientTracker,&position,NULL,NULL,&TrackerSerNum);
@@ -1007,7 +1008,7 @@ static char * test_037(void)
 
 static char * test_038(void)
 {
-    //!controller and tracker inactive!
+    //Note: controller and tracker are both inactive!
     
     Status3D = Q3Tracker_GetPosition(ClientTracker,&position,NULL,NULL,&TrackerSerNum);
     mu_assert("error, no kQ3Success", Status3D == kQ3Success);
@@ -1037,7 +1038,7 @@ static char * test_038(void)
 
 static char * test_039(void)
 {
-    //!controller and tracker inactive!
+    //Note: controller and tracker are both inactive!
     
     Status3D = Q3Tracker_GetOrientation(ClientTracker,&orientation,NULL,NULL,&TrackerSerNum);
     mu_assert("error, no kQ3Success", Status3D == kQ3Success);
@@ -1106,7 +1107,7 @@ static char * test_041(void)
 {
     //controller decommisioned
 
-    Status3D = Q3Controller_Decommission(DriverController); //what happens to assigned tracker?
+    Status3D = Q3Controller_Decommission(DriverController); //TODO: what happens to assigned tracker?
     mu_assert("error, no kQ3Success", Status3D == kQ3Success);
     
     Status3D = Q3Controller_GetActivation(ClientController,&controllerActivation);

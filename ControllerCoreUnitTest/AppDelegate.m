@@ -11,17 +11,9 @@
 //unit testing
 #include "minunit.h"
 
-
 #import "AppDelegate.h"
 
-@implementation AppDelegate
-
-- (void)dealloc
-{
-    [super dealloc];
-}
-
-- (void)applicationDidFinishLaunching:(NSNotification *)aNotification
+void allTests(void)
 {
     char *result = do_bench();
     
@@ -33,7 +25,37 @@
     }
     NSLog(@"Tests run: %d\n", tests_run);
     
-    //[NSApp performSelector:@selector(terminate:) withObject:nil afterDelay:0.0];
+    return;
+}
+
+@implementation AppDelegate
+
+- (void)dealloc
+{
+    [super dealloc];
+}
+
+- (void)applicationDidFinishLaunching:(NSNotification *)aNotification
+{
+    allTests();
 }
 
 @end
+
+#pragma mark -
+// this is a faceless background application
+int main(int argc, char * argv[]) {
+    NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
+    
+#if 0
+    NSApplication * application = [NSApplication sharedApplication];
+            
+    [application run];
+#else
+    allTests();
+#endif
+    
+    [pool drain];
+    
+    return EXIT_SUCCESS;
+}
