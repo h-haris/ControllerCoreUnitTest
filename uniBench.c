@@ -47,7 +47,7 @@ static int dbgline;
 void dbginfo(int line, const char *file)
 {
 	dbgfile = file;
-	dbgline = line;//set and activate breakpoint here if mu_assert fails
+	dbgline = line;//TODO: set and activate breakpoint here if mu_assert fails
 };
 
 void debug(const char *fmt, ...)
@@ -142,14 +142,14 @@ TQ3Status ChannelGetMethod(	TQ3ControllerRef    controllerRef,
 	*dataSize=sizeof(TQ3Uns32);
 	
 	return status;
-};								
+};
 
 //controller_SetChannel
 TQ3Status ChannelSetMethod( TQ3ControllerRef    controllerRef,
                             TQ3Uns32            channel,
                             const void          *data,//NULL is valid!
                             TQ3Uns32            dataSize);
-							
+
 TQ3Status ChannelSetMethod( TQ3ControllerRef    controllerRef,
                             TQ3Uns32            channel,
                             const void          *data,//NULL is valid!
@@ -229,12 +229,6 @@ static char * test_002(void)
 	mu_assert("error, controllerListChanged != kQ3False", controllerListChanged == kQ3False);
     mu_assert("error, controllerListSerialNumber != 0", controllerListSerialNumber == 0);
 #endif	
-    /*
-     QD3D
-     Status3D = kQ3Success
-     controllerListChanged = kQ3True
-     controllerListSerialNumber = 1; at first start
-     */
     return 0;
 };
 
@@ -753,7 +747,6 @@ static char * test_030(void)
     //Check tracker orientation
     Status3D = Q3Controller_GetTrackerOrientation(ClientController,&orientation);
     mu_assert("error, no kQ3Success", Status3D == kQ3Success);
-    //TODO: check: ambitious, might depend on activation state
     mu_assert("error, wrong orientation", (orientation.w == 1.)&&(orientation.x == 0.)&&(orientation.y == 0.)&&(orientation.z == 0.) );
     
     Status3D = Q3Controller_GetButtons(ClientController,&tempUns32);
