@@ -9,10 +9,17 @@
 
 #include <math.h>
 #ifdef BenchX
+//for Quesa
+#ifndef QUESA_OS_MACINTOSH
 #define QUESA_OS_MACINTOSH 1
+#endif
+
+#ifndef Q3_DEBUG
 #define Q3_DEBUG 1
+#endif
 
 #include <Quesa/Quesa.h>
+//#include "Quesa/Quesa.h"
 #include <Quesa/QuesaController.h>
 #include <Quesa/QuesaMath.h>
 #else
@@ -273,8 +280,13 @@ static char * test_006(void)
 {
     Status3D = Q3Controller_Next(NULL,&ClientController);
     mu_assert("error, no kQ3Success", Status3D == kQ3Success);
+#ifdef __MWERKS__
     mu_assert("error, not ClientController == DriverController", ClientController == DriverController);
-
+#else
+    mu_assert("error, not ClientController == DriverController",
+              kCFCompareEqualTo == CFStringCompare((CFStringRef)ClientController, (CFStringRef)DriverController,
+                                                   kCFCompareCaseInsensitive));
+#endif
     return 0;
 };
 
