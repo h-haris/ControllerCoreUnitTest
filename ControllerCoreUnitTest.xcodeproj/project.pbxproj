@@ -7,12 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		654846FF1702468A00A0D584 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 654846FE1702468A00A0D584 /* Cocoa.framework */; };
 		654847091702468A00A0D584 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 654847071702468A00A0D584 /* InfoPlist.strings */; };
 		6548470F1702468A00A0D584 /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 6548470D1702468A00A0D584 /* Credits.rtf */; };
 		654847121702468A00A0D584 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 654847111702468A00A0D584 /* AppDelegate.m */; };
 		6548471F1702469C00A0D584 /* uniBench.c in Sources */ = {isa = PBXBuildFile; fileRef = 6548471C1702469C00A0D584 /* uniBench.c */; };
-		7F983F09239FD75700B4977A /* Quesa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F983F08239FD75700B4977A /* Quesa.framework */; };
+		7FAD846C2636EC44005B0EED /* Quesa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7FAD84682636EC2B005B0EED /* Quesa.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +27,7 @@
 		7F983F04239FD48900B4977A /* uniBench.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uniBench.h; sourceTree = "<group>"; };
 		7F983F05239FD48900B4977A /* minunit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = minunit.h; sourceTree = "<group>"; };
 		7F983F08239FD75700B4977A /* Quesa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Quesa.framework; path = ../../../../Library/Frameworks/Quesa.framework; sourceTree = "<group>"; };
+		7FAD84682636EC2B005B0EED /* Quesa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Quesa.framework; path = ../Quesa/SDK/Libraries/Mac/Framework_Modern/Debug/Quesa.framework; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -35,8 +35,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7F983F09239FD75700B4977A /* Quesa.framework in Frameworks */,
-				654846FF1702468A00A0D584 /* Cocoa.framework in Frameworks */,
+				7FAD846C2636EC44005B0EED /* Quesa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -66,8 +65,9 @@
 		654846FD1702468A00A0D584 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				7F983F08239FD75700B4977A /* Quesa.framework */,
+				7FAD84682636EC2B005B0EED /* Quesa.framework */,
 				654846FE1702468A00A0D584 /* Cocoa.framework */,
+				7F983F08239FD75700B4977A /* Quesa.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -228,7 +228,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
 			};
@@ -271,7 +271,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				SDKROOT = macosx;
 			};
 			name = Release;
@@ -290,7 +290,7 @@
 				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = "ControllerCoreUnitTest/ControllerCoreUnitTest-Info.plist";
 				LIBRARY_SEARCH_PATHS = "";
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				PRODUCT_BUNDLE_IDENTIFIER = "HMDP.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				USE_HEADERMAP = YES;
@@ -312,7 +312,7 @@
 				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = "ControllerCoreUnitTest/ControllerCoreUnitTest-Info.plist";
 				LIBRARY_SEARCH_PATHS = "";
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				PRODUCT_BUNDLE_IDENTIFIER = "HMDP.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				USE_HEADERMAP = YES;
