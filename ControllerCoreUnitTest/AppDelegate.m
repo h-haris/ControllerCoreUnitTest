@@ -29,12 +29,6 @@ void allTests(void)
 }
 
 @implementation AppDelegate
-
-- (void)dealloc
-{
-    [super dealloc];
-}
-
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
     allTests();
@@ -45,17 +39,9 @@ void allTests(void)
 #pragma mark -
 // this is a faceless background application
 int main(int argc, char * argv[]) {
-    NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
-    
-#if 0
-    NSApplication * application = [NSApplication sharedApplication];
-            
-    [application run];
-#else
-    allTests();
-#endif
-    
-    [pool drain];
+    @autoreleasepool {
+        allTests();
+    }
     
     return EXIT_SUCCESS;
 }
