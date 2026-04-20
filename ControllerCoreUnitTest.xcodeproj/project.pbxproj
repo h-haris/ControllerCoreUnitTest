@@ -12,6 +12,10 @@
 		654847121702468A00A0D584 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 654847111702468A00A0D584 /* AppDelegate.m */; };
 		6548471F1702469C00A0D584 /* uniBench.c in Sources */ = {isa = PBXBuildFile; fileRef = 6548471C1702469C00A0D584 /* uniBench.c */; };
 		7FAD846C2636EC44005B0EED /* Quesa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7FAD84682636EC2B005B0EED /* Quesa.framework */; };
+		7FB16C4B2F969D2D00CE3449 /* ControllerCoreTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7FB16C4A2F969D2D00CE3449 /* ControllerCoreTest.cpp */; };
+		7FB16C4D2F969D4D00CE3449 /* MIGRATION_SUMMARY.md in Resources */ = {isa = PBXBuildFile; fileRef = 7FB16C4C2F969D4D00CE3449 /* MIGRATION_SUMMARY.md */; };
+		7FB16C4F2F969F5200CE3449 /* MIGRATION_STATUS.md in Resources */ = {isa = PBXBuildFile; fileRef = 7FB16C4E2F969F5200CE3449 /* MIGRATION_STATUS.md */; };
+		7FB16C512F96A07F00CE3449 /* TEST_030_MIGRATION.md in Resources */ = {isa = PBXBuildFile; fileRef = 7FB16C502F96A07F00CE3449 /* TEST_030_MIGRATION.md */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +32,12 @@
 		7F983F05239FD48900B4977A /* minunit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = minunit.h; sourceTree = "<group>"; };
 		7F983F08239FD75700B4977A /* Quesa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Quesa.framework; path = ../../../../Library/Frameworks/Quesa.framework; sourceTree = "<group>"; };
 		7FAD84682636EC2B005B0EED /* Quesa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Quesa.framework; path = ../Quesa/SDK/Libraries/Mac/Framework_Modern/Debug/Quesa.framework; sourceTree = "<group>"; };
+		7FB16C482F969C7000CE3449 /* testsControllerTestFixture.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = testsControllerTestFixture.h; sourceTree = "<group>"; };
+		7FB16C492F969C7F00CE3449 /* testsControllerTestHelpers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = testsControllerTestHelpers.h; sourceTree = "<group>"; };
+		7FB16C4A2F969D2D00CE3449 /* ControllerCoreTest.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ControllerCoreTest.cpp; sourceTree = "<group>"; };
+		7FB16C4C2F969D4D00CE3449 /* MIGRATION_SUMMARY.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = MIGRATION_SUMMARY.md; sourceTree = "<group>"; };
+		7FB16C4E2F969F5200CE3449 /* MIGRATION_STATUS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = MIGRATION_STATUS.md; sourceTree = "<group>"; };
+		7FB16C502F96A07F00CE3449 /* TEST_030_MIGRATION.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = TEST_030_MIGRATION.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -51,6 +61,12 @@
 				654847041702468A00A0D584 /* ControllerCoreUnitTest */,
 				654846FD1702468A00A0D584 /* Frameworks */,
 				654846FC1702468A00A0D584 /* Products */,
+				7FB16C482F969C7000CE3449 /* testsControllerTestFixture.h */,
+				7FB16C492F969C7F00CE3449 /* testsControllerTestHelpers.h */,
+				7FB16C4A2F969D2D00CE3449 /* ControllerCoreTest.cpp */,
+				7FB16C4C2F969D4D00CE3449 /* MIGRATION_SUMMARY.md */,
+				7FB16C4E2F969F5200CE3449 /* MIGRATION_STATUS.md */,
+				7FB16C502F96A07F00CE3449 /* TEST_030_MIGRATION.md */,
 			);
 			sourceTree = "<group>";
 		};
@@ -146,7 +162,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				654847091702468A00A0D584 /* InfoPlist.strings in Resources */,
+				7FB16C4D2F969D4D00CE3449 /* MIGRATION_SUMMARY.md in Resources */,
 				6548470F1702468A00A0D584 /* Credits.rtf in Resources */,
+				7FB16C4F2F969F5200CE3449 /* MIGRATION_STATUS.md in Resources */,
+				7FB16C512F96A07F00CE3449 /* TEST_030_MIGRATION.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -157,6 +176,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7FB16C4B2F969D2D00CE3449 /* ControllerCoreTest.cpp in Sources */,
 				654847121702468A00A0D584 /* AppDelegate.m in Sources */,
 				6548471F1702469C00A0D584 /* uniBench.c in Sources */,
 			);
