@@ -46,38 +46,38 @@
 // 3D Math Assertions
 // ============================================================================
 
-#define EXPECT_POINT3D_EQ(p, x, y, z) \
+#define EXPECT_POINT3D_EQ(pt, ex, ey, ez) \
     do { \
-        EXPECT_FLOAT_EQ((x), (p).x) << "Point3D.x mismatch"; \
-        EXPECT_FLOAT_EQ((y), (p).y) << "Point3D.y mismatch"; \
-        EXPECT_FLOAT_EQ((z), (p).z) << "Point3D.z mismatch"; \
+        EXPECT_FLOAT_EQ((ex), (pt).x) << "Point3D.x mismatch"; \
+        EXPECT_FLOAT_EQ((ey), (pt).y) << "Point3D.y mismatch"; \
+        EXPECT_FLOAT_EQ((ez), (pt).z) << "Point3D.z mismatch"; \
     } while(0)
 
-#define EXPECT_VECTOR3D_EQ(v, x, y, z) \
+#define EXPECT_VECTOR3D_EQ(v, ex, ey, ez) \
     do { \
-        EXPECT_FLOAT_EQ((x), (v).x) << "Vector3D.x mismatch"; \
-        EXPECT_FLOAT_EQ((y), (v).y) << "Vector3D.y mismatch"; \
-        EXPECT_FLOAT_EQ((z), (v).z) << "Vector3D.z mismatch"; \
+        EXPECT_FLOAT_EQ((ex), (v).x) << "Vector3D.x mismatch"; \
+        EXPECT_FLOAT_EQ((ey), (v).y) << "Vector3D.y mismatch"; \
+        EXPECT_FLOAT_EQ((ez), (v).z) << "Vector3D.z mismatch"; \
     } while(0)
 
-#define EXPECT_QUATERNION_EQ(q, w, x, y, z) \
+#define EXPECT_QUATERNION_EQ(q, ew, ex, ey, ez) \
     do { \
-        EXPECT_FLOAT_EQ((w), (q).w) << "Quaternion.w mismatch"; \
-        EXPECT_FLOAT_EQ((x), (q).x) << "Quaternion.x mismatch"; \
-        EXPECT_FLOAT_EQ((y), (q).y) << "Quaternion.y mismatch"; \
-        EXPECT_FLOAT_EQ((z), (q).z) << "Quaternion.z mismatch"; \
+        EXPECT_FLOAT_EQ((ew), (q).w) << "Quaternion.w mismatch"; \
+        EXPECT_FLOAT_EQ((ex), (q).x) << "Quaternion.x mismatch"; \
+        EXPECT_FLOAT_EQ((ey), (q).y) << "Quaternion.y mismatch"; \
+        EXPECT_FLOAT_EQ((ez), (q).z) << "Quaternion.z mismatch"; \
     } while(0)
 
-#define EXPECT_QUATERNION_NEAR(q, w, x, y, z) \
+#define EXPECT_QUATERNION_NEAR(q, ew, ex, ey, ez) \
     do { \
-        EXPECT_TRUE(FL_EQUAL((q).w, (w))) \
-            << "Quaternion.w expected " << (w) << ", got " << (q).w; \
-        EXPECT_TRUE(FL_EQUAL((q).x, (x))) \
-            << "Quaternion.x expected " << (x) << ", got " << (q).x; \
-        EXPECT_TRUE(FL_EQUAL((q).y, (y))) \
-            << "Quaternion.y expected " << (y) << ", got " << (q).y; \
-        EXPECT_TRUE(FL_EQUAL((q).z, (z))) \
-            << "Quaternion.z expected " << (z) << ", got " << (q).z; \
+        EXPECT_TRUE(FL_EQUAL((q).w, (ew))) \
+            << "Quaternion.w expected " << (ew) << ", got " << (q).w; \
+        EXPECT_TRUE(FL_EQUAL((q).x, (ex))) \
+            << "Quaternion.x expected " << (ex) << ", got " << (q).x; \
+        EXPECT_TRUE(FL_EQUAL((q).y, (ey))) \
+            << "Quaternion.y expected " << (ey) << ", got " << (q).y; \
+        EXPECT_TRUE(FL_EQUAL((q).z, (ez))) \
+            << "Quaternion.z expected " << (ez) << ", got " << (q).z; \
     } while(0)
 
 #endif // CONTROLLER_TEST_HELPERS_H

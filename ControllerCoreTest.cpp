@@ -11,6 +11,10 @@
 #include <cstring>
 #include <iostream>
 
+#ifdef __APPLE__
+#include <CoreFoundation/CoreFoundation.h>
+#endif
+
 // ============================================================================
 // Test Suite: Controller Core Tests
 // Oracle: test_000 through test_043 from uniBench.c
@@ -469,7 +473,7 @@ TEST_F(ControllerCoreTestFixture, Test_022_TrackerPosition_Initial) {
     TrackerSerNum = 0;
     Status3D = Q3Tracker_GetPosition(ClientTracker, &position, NULL, NULL, &TrackerSerNum);
     EXPECT_Q3_SUCCESS(Status3D);
-    EXPECT_POINT3D_EQ(position, 0.0f, 0.0f, 0.0f) << "Initial position should be (0,0,0)";
+    EXPECT_POINT3D_EQ(position, 0.0f, 0.0f, 0.0f); // Initial position should be (0,0,0)
     EXPECT_EQ(1u, TrackerSerNum) << "TrackerSerNum should be 1";
     
     // Get event coordinates (should fail - no event set yet)
@@ -504,8 +508,8 @@ TEST_F(ControllerCoreTestFixture, Test_022_TrackerPosition_Initial) {
 TEST_F(ControllerCoreTestFixture, Test_023_TrackerPosition_AfterSet) {
     Status3D = Q3Tracker_GetPosition(ClientTracker, &position, &deltaPos, &changed, &TrackerSerNum);
     EXPECT_Q3_SUCCESS(Status3D);
-    EXPECT_POINT3D_EQ(position, 1.0f, 1.0f, 1.0f) << "Position should be (1,1,1)";
-    EXPECT_VECTOR3D_EQ(deltaPos, 0.0f, 0.0f, 0.0f) << "DeltaPos should be (0,0,0)";
+    EXPECT_POINT3D_EQ(position, 1.0f, 1.0f, 1.0f); // Position should be (1,1,1)
+    EXPECT_VECTOR3D_EQ(deltaPos, 0.0f, 0.0f, 0.0f); // DeltaPos should be (0,0,0)
     EXPECT_TRUE(changed) << "changed should be kQ3True";
     EXPECT_EQ(2u, TrackerSerNum) << "TrackerSerNum should be 2";
     
@@ -832,18 +836,18 @@ TEST_F(ControllerCoreTestFixture, Test_030_StateRestore) {
     EXPECT_Q3_SUCCESS(Status3D);
 #if 1
     // Deactivated controller should have no effect on returned position
-    EXPECT_POINT3D_EQ(position, 1.0f, 1.0f, 1.0f)
-        << "Position should be (1,1,1) - deactivated controller has no effect on returned position";
+    EXPECT_POINT3D_EQ(position, 1.0f, 1.0f, 1.0f);
+    // Position should be (1,1,1) - deactivated controller has no effect on returned position
 #else
-    EXPECT_POINT3D_EQ(position, 0.0f, 0.0f, 0.0f)
-        << "Alternative: position should be (0,0,0)";
+    EXPECT_POINT3D_EQ(position, 0.0f, 0.0f, 0.0f);
+    // Alternative: position should be (0,0,0)
 #endif
     
     // Check tracker orientation
     Status3D = Q3Controller_GetTrackerOrientation(ClientController, &orientation);
     EXPECT_Q3_SUCCESS(Status3D);
-    EXPECT_QUATERNION_EQ(orientation, 1.0f, 0.0f, 0.0f, 0.0f)
-        << "Orientation should be identity quaternion";
+    EXPECT_QUATERNION_EQ(orientation, 1.0f, 0.0f, 0.0f, 0.0f);
+    // Orientation should be identity quaternion
     
     // Check buttons
     Status3D = Q3Controller_GetButtons(ClientController, &tempUns32);
@@ -858,8 +862,704 @@ TEST_F(ControllerCoreTestFixture, Test_030_StateRestore) {
     EXPECT_EQ(3u, CtrlSerNum) << "CtrlSerNum should be 3"; // TBC: QD3D - CtrlSerNum = 3
 }
 
+/**
+ * @brief test_031: Get event coordinates for multiple time values
+ * 
+ * Oracle behavior: Test Q3Tracker_GetEventCoordinates for various time values.
+ * This verifies that event coordinates set in previous tests (022-026) can be retrieved.
+ * 
+ * Event times tested:
+ * - time 10: buttons=5, position=(0,0,0) - set in test_022
+ * - time 20: buttons=0, position=(1,1,1) - set in test_023
+ * - time 30: buttons=0, position=(2,2,2) - set in test_024
+ * - time 40: buttons=0, orientation=(1,0,0,0) - set in test_025
+ * - time 50: buttons=0, orientation=(-0.8733,-0.4871) - set in test_026
+ * 
+ * After all events are retrieved, calling GetEventCoordinates again should fail.
+ */
+TEST_F(ControllerCoreTestFixture, Test_031_GetEventCoordinates) {
+    // Reset position for testing
+    position.x = -1.0f;
+    position.y = -1.0f;
+    position.z = -1.0f;
+    tempUns32 = 0;
+    
+    // Event at time 10 (set in test_022)
+    Status3D = Q3Tracker_GetEventCoordinates(ClientTracker, 10, &tempUns32, &position, &orientation);
+    EXPECT_Q3_SUCCESS(Status3D);
+    EXPECT_EQ(5u, tempUns32) << "Buttons at time 10 should be 5";
+    EXPECT_POINT3D_EQ(position, 0.0f, 0.0f, 0.0f); // Position at time 10 should be (0,0,0)
+    
+    // Event at time 20 (set in test_023)
+    Status3D = Q3Tracker_GetEventCoordinates(ClientTracker, 20, &tempUns32, &position, &orientation);
+    EXPECT_Q3_SUCCESS(Status3D);
+    EXPECT_EQ(0u, tempUns32) << "Buttons at time 20 should be 0";
+    EXPECT_POINT3D_EQ(position, 1.0f, 1.0f, 1.0f); // Position at time 20 should be (1,1,1)
+    
+    // Event at time 30 (set in test_024)
+    Status3D = Q3Tracker_GetEventCoordinates(ClientTracker, 30, &tempUns32, &position, &orientation);
+    EXPECT_Q3_SUCCESS(Status3D);
+    EXPECT_EQ(0u, tempUns32) << "Buttons at time 30 should be 0";
+    EXPECT_POINT3D_EQ(position, 2.0f, 2.0f, 2.0f); // Position at time 30 should be (2,2,2)
+    
+    // Event at time 40 (set in test_025) - orientation only
+    Status3D = Q3Tracker_GetEventCoordinates(ClientTracker, 44, &tempUns32, &position, &orientation);
+    EXPECT_Q3_SUCCESS(Status3D);
+    EXPECT_EQ(0u, tempUns32) << "Buttons at time 44 should be 0";
+    EXPECT_QUATERNION_EQ(orientation, 1.0f, 0.0f, 0.0f, 0.0f);
+    // Orientation at time 44 should be identity
+    
+    // Event at time 50 (set in test_026) - orientation with rotation
+#if 1
+    Status3D = Q3Tracker_GetEventCoordinates(ClientTracker, 50, NULL, NULL, &orientation);
+    EXPECT_Q3_SUCCESS(Status3D);
+    EXPECT_QUATERNION_NEAR(orientation, -0.8733047f, 0.0f, -0.4871745f, 0.0f);
+    // Orientation at time 50 should be 45-degree Y rotation
+#else
+    Status3D = Q3Tracker_GetEventCoordinates(ClientTracker, 50, &tempUns32, &position, &orientation);
+    EXPECT_Q3_SUCCESS(Status3D);
+    EXPECT_EQ(0u, tempUns32) << "Buttons at time 50 should be 0";
+    EXPECT_QUATERNION_NEAR(orientation, -0.8733047f, 0.0f, -0.4871745f, 0.0f);
+    EXPECT_POINT3D_EQ(position, 2.0f, 2.0f, 2.0f);
+#endif
+    
+    // Try to get event at time 10 again - should fail (events consumed)
+    Status3D = Q3Tracker_GetEventCoordinates(ClientTracker, 10, &tempUns32, &position, &orientation);
+    EXPECT_Q3_FAILURE(Status3D)
+        << "GetEventCoordinates should fail - event coordinates no longer available";
+}
+
+/**
+ * @brief test_032: Channel Get/Set methods
+ * 
+ * Oracle behavior: Comprehensive test of channel communication.
+ * Channels are zero-indexed (0 to channelCount-1).
+ * 
+ * Key oracle notes:
+ * - Channels count from 0 (zero)
+ * - ChannelCount == 4, so valid channels are 0-3
+ * - Channel 4 is "ambitious" - out of range but QD3D succeeds
+ * - QD3D ignores channelCount!
+ * - ChannelGetMethod returns kQ3Failure for out-of-range, but QD3D overrides to kQ3Success
+ * 
+ * Oracle recommendation: Driver should keep local copy of channelCount and check range.
+ */
+TEST_F(ControllerCoreTestFixture, Test_032_ChannelMethods) {
+    // Set channel 0 to 150
+    whatSet = 150;
+    Status3D = Q3Controller_SetChannel(ClientController, 0, &whatSet, sizeof(whatSet));
+    EXPECT_Q3_SUCCESS(Status3D);
+    
+    // Set channel 1 to 250
+    whatSet = 250;
+    Status3D = Q3Controller_SetChannel(ClientController, 1, &whatSet, sizeof(whatSet));
+    EXPECT_Q3_SUCCESS(Status3D);
+    
+    // Get channel 0 - should return 250 (last write wins due to ChannelGetMethod implementation)
+    whatGet = 0;
+    whatSize = 0;
+    whatSize = sizeof(whatGet);
+    Status3D = Q3Controller_GetChannel(ClientController, 0, &whatGet, &whatSize);
+    EXPECT_Q3_SUCCESS(Status3D);
+    EXPECT_EQ(250u, whatGet) << "Channel 0 should return 250 (last write)";
+    EXPECT_EQ(4u, whatSize) << "whatSize should be 4";
+    
+    // Get channel 1 - should return 150
+    whatGet = 0;
+    whatSize = 0;
+    Status3D = Q3Controller_GetChannel(ClientController, 1, &whatGet, &whatSize);
+    EXPECT_Q3_SUCCESS(Status3D);
+    EXPECT_EQ(150u, whatGet) << "Channel 1 should return 150";
+    EXPECT_EQ(4u, whatSize) << "whatSize should be 4";
+    
+    // Get channel 2 - should return 4 (from ChannelGetMethod switch default)
+    whatGet = 0;
+    whatSize = 0;
+    Status3D = Q3Controller_GetChannel(ClientController, 2, &whatGet, &whatSize);
+    EXPECT_Q3_SUCCESS(Status3D);
+    EXPECT_EQ(4u, whatGet) << "Channel 2 should return 4";
+    EXPECT_EQ(4u, whatSize) << "whatSize should be 4";
+    
+    // Get channel 3 - should return 1500 (set in test_028)
+    whatGet = 0;
+    whatSize = 0;
+    Status3D = Q3Controller_GetChannel(ClientController, 3, &whatGet, &whatSize);
+#if 1
+    EXPECT_Q3_SUCCESS(Status3D);
+#else
+    EXPECT_Q3_FAILURE(Status3D);
+#endif
+    EXPECT_EQ(1500u, whatGet) << "Channel 3 should return 1500";
+    EXPECT_EQ(4u, whatSize) << "whatSize should be 4";
+    
+    // Get channel 4 - OUT OF RANGE (ChannelCount==4, channels 0 to 3!)
+    // Oracle: "channel 4 is ambitious"
+    whatGet = 0;
+    whatSize = 0;
+    Status3D = Q3Controller_GetChannel(ClientController, 4, &whatGet, &whatSize);
+    // channel 4 is ambitious. remember: ChannelCount==4, channels 0 to 3!
+#if 1
+    EXPECT_Q3_SUCCESS(Status3D)
+        << "QD3D succeeds even for out-of-range channel";
+    EXPECT_EQ(65000u, whatGet)
+        << "Channel 4 should return 65000 (from default case ChannelGetMethod)";
+#else
+    EXPECT_Q3_FAILURE(Status3D)
+        << "Should fail for out-of-range channel";
+    EXPECT_EQ(1500u, whatGet)
+        << "TBC: same as channel 3?";
+#endif
+    EXPECT_EQ(4u, whatSize) << "whatSize should be 4";
+    
+    /* TBC from oracle:
+     + observation:
+     - shouldn't be successful, but works!
+     - should be kQ3Failure by ChannelGetMethod, but QD3D overrides return value!
+     - Method got called!! - QD3D-doc recommends 0<=channel<channelCount but defines no error!
+     - TODO: (graceful) pass; with whatSize=4; whatGet wasn't modified
+     
+     + Conclusion: QD3D ignores channelCount!
+     
+     + Solution: SetChannel and GetChannel are methods to communicate with the device driver.
+     When the driver creates a new instance of a TQ3Controller via Q3Controller_New, it should keep
+     a local copy of the TQ3ControllerData.ChannelCount value. Later the driver can check against this
+     copy if the channel of SetChannel or GetChannel is out of Range and should behave gracefully.
+     */
+}
+
+/**
+ * @brief test_033: Deactivate controller and tracker
+ * 
+ * Oracle behavior: Set both controller and tracker to inactive.
+ * 
+ * IMPORTANT: For all follow-up tests (034-040), controller and tracker are now inactive!
+ */
+TEST_F(ControllerCoreTestFixture, Test_033_DeactivateControllerAndTracker) {
+    // Deactivate controller
+    Status3D = Q3Controller_SetActivation(ClientController, kQ3False);
+    EXPECT_Q3_SUCCESS(Status3D);
+    
+    // Deactivate tracker
+    Status3D = Q3Tracker_SetActivation(ClientTracker, kQ3False);
+    EXPECT_Q3_SUCCESS(Status3D);
+    
+    // Verify controller is deactivated
+    Status3D = Q3Controller_GetActivation(ClientController, &controllerActivation);
+    EXPECT_Q3_SUCCESS(Status3D);
+    EXPECT_FALSE(controllerActivation)
+        << "controllerActivation should be kQ3False (ambitious behavior)";
+}
+
+/**
+ * @brief test_034: Check signature a 2nd time (with inactive controller)
+ * 
+ * Oracle behavior: Signature should still be retrievable even when controller is inactive.
+ */
+TEST_F(ControllerCoreTestFixture, Test_034_GetSignature_Inactive) {
+    // Note: controller and tracker are both inactive (from test_033)
+    
+    // Get truncated signature
+    Status3D = Q3Controller_GetSignature(ClientController, tempString, 5);
+    EXPECT_Q3_SUCCESS(Status3D);
+    EXPECT_STREQ("com.", tempString)
+        << "Truncated signature should be 'com.'";
+    
+    // Get full signature
+    Status3D = Q3Controller_GetSignature(ClientController, tempString, 128);
+    EXPECT_Q3_SUCCESS(Status3D);
+    EXPECT_STREQ("com.HMDP.BenchController", tempString)
+        << "Full signature should be 'com.HMDP.BenchController'";
+}
+
+/**
+ * @brief test_035: Get value count and track cursor (with inactive controller)
+ * 
+ * Oracle behavior: These properties should still be queryable when inactive.
+ */
+TEST_F(ControllerCoreTestFixture, Test_035_GetValueCount_TrackCursor_Inactive) {
+    // Note: controller and tracker are both inactive!
+    
+    // Get value count
+    Status3D = Q3Controller_GetValueCount(ClientController, &tempUns32);
+    EXPECT_Q3_SUCCESS(Status3D);
+    EXPECT_EQ(16u, tempUns32)
+        << "ValueCount should still be 16 when inactive";
+    
+    // Check 2D cursor tracking
+    Status3D = Q3Controller_Track2DCursor(DriverController, &tempBool);
+    EXPECT_Q3_SUCCESS(Status3D);
+    EXPECT_FALSE(tempBool)
+        << "Controller should not track 2D cursor";
+    
+    // Check 3D cursor tracking
+    Status3D = Q3Controller_Track3DCursor(DriverController, &tempBool);
+    EXPECT_Q3_SUCCESS(Status3D);
+    EXPECT_FALSE(tempBool)
+        << "Controller should not track 3D cursor";
+}
+
+/**
+ * @brief test_036: Buttons with inactive controller/tracker
+ * 
+ * Oracle behavior: When controller/tracker are inactive:
+ * - SetButtons should NOT trigger TrackerProc callback
+ * - GetButtons via Tracker should return 0 (not the set value)
+ * - GetButtons via Controller should return last active value (7)
+ * - Subsequent GetButtons via Tracker should return 0 (buttons cleared)
+ */
+TEST_F(ControllerCoreTestFixture, Test_036_Buttons_Inactive) {
+    // Note: controller and tracker are both inactive!
+    
+    TQ3Uns32 lastTrackerProcCalled = trackerProcCalled;
+    
+    // Set buttons - should NOT trigger callback (inactive)
+    Status3D = Q3Controller_SetButtons(DriverController, 5);
+    EXPECT_Q3_SUCCESS(Status3D);
+    EXPECT_EQ(lastTrackerProcCalled, trackerProcCalled)
+        << "trackerProc should NOT be called - Controller is inactive";
+    
+    // Get buttons via Tracker - should return 0 (inactive tracker)
+    tempUns32 = 0;
+    Status3D = Q3Tracker_GetButtons(ClientTracker, &tempUns32);
+    EXPECT_Q3_SUCCESS(Status3D);
+#if 1
+    EXPECT_EQ(0u, tempUns32)
+        << "Buttons via Tracker should be 0 (ambitious - inactive tracker)";
+#else
+    EXPECT_EQ(7u, tempUns32)
+        << "Alternative: Buttons should be 7";
+#endif
+    
+    // Get buttons via Controller - should return 7 (last active value)
+    tempUns32 = 0;
+    Status3D = Q3Controller_GetButtons(ClientController, &tempUns32);
+    EXPECT_Q3_SUCCESS(Status3D);
+    EXPECT_EQ(7u, tempUns32)
+        << "Buttons via Controller should be 7 (ambitious - last active value)";
+    
+    // Get buttons via Tracker again - should be 0 (cleared)
+    tempUns32 = 0;
+    Status3D = Q3Tracker_GetButtons(ClientTracker, &tempUns32);
+    EXPECT_Q3_SUCCESS(Status3D);
+    EXPECT_EQ(0u, tempUns32)
+        << "Buttons not cleared. Buttons were returned the call before, "
+        << "then the tracker set buttons bitfield to zero.";
+}
+
+/**
+ * @brief test_037: Position with inactive tracker
+ * 
+ * Oracle behavior: When tracker is inactive:
+ * - GetPosition should return (0,0,0)
+ * - TrackerSerNum should NOT be overwritten (remains 0)
+ * - SetTrackerPosition should NOT trigger TrackerProc
+ * - Position should remain unchanged
+ * 
+ * Oracle note: "Q3Tracker_GetPosition shall not overwrite TrackerSerNum when deactivated"
+ */
+TEST_F(ControllerCoreTestFixture, Test_037_Position_Inactive) {
+    TQ3Uns32 lastTrackerProcCalled;
+    // Note: controller and tracker are both inactive!
+    
+    // Get initial position - should be (0,0,0) with TrackerSerNum unchanged
+    TrackerSerNum = 0;
+    Status3D = Q3Tracker_GetPosition(ClientTracker, &position, NULL, NULL, &TrackerSerNum);
+    EXPECT_Q3_SUCCESS(Status3D);
+    EXPECT_POINT3D_EQ(position, 0.0f, 0.0f, 0.0f);
+    // Position should be (0,0,0) when inactive
+    EXPECT_EQ(0u, TrackerSerNum)
+        << "Q3Tracker_GetPosition shall not overwrite TrackerSerNum when deactivated";
+    
+    // Set tracker position - should NOT trigger callback
+    lastTrackerProcCalled = trackerProcCalled;
+    position.x = 1.0f;
+    position.y = 1.0f;
+    position.z = 1.0f;
+    Status3D = Q3Controller_SetTrackerPosition(DriverController, &position);
+    EXPECT_Q3_SUCCESS(Status3D);
+    EXPECT_EQ(lastTrackerProcCalled, trackerProcCalled)
+        << "trackerProc should NOT be called - Controller is inactive";
+    
+    // Get position again - should still be (0,0,0)
+    Status3D = Q3Tracker_GetPosition(ClientTracker, &position, &deltaPos, &changed, &TrackerSerNum);
+    EXPECT_Q3_SUCCESS(Status3D);
+    EXPECT_POINT3D_EQ(position, 0.0f, 0.0f, 0.0f);
+    // Position should remain (0,0,0) - set had no effect
+    EXPECT_VECTOR3D_EQ(deltaPos, 0.0f, 0.0f, 0.0f);
+    // deltaPos should be (0,0,0)
+    EXPECT_FALSE(changed)
+        << "Tracker should not have changed";
+    EXPECT_EQ(0u, TrackerSerNum)
+        << "Q3Tracker_GetPosition shall not overwrite TrackerSerNum when deactivated";
+    
+    // Get via controller - should also be (0,0,0)
+    Status3D = Q3Controller_GetTrackerPosition(ClientController, &position);
+    EXPECT_Q3_SUCCESS(Status3D);
+    EXPECT_POINT3D_EQ(position, 0.0f, 0.0f, 0.0f);
+    // Position via Controller should be (0,0,0)
+}
+
+/**
+ * @brief test_038: Move position with inactive tracker
+ * 
+ * Oracle behavior: When tracker is inactive:
+ * - MoveTrackerPosition should succeed but have no effect
+ * - Position should remain (0,0,0)
+ * - TrackerSerNum should remain 0
+ */
+TEST_F(ControllerCoreTestFixture, Test_038_MovePosition_Inactive) {
+    // Note: controller and tracker are both inactive!
+    
+    // Verify initial position
+    Status3D = Q3Tracker_GetPosition(ClientTracker, &position, NULL, NULL, &TrackerSerNum);
+    EXPECT_Q3_SUCCESS(Status3D);
+    EXPECT_POINT3D_EQ(position, 0.0f, 0.0f, 0.0f);
+    EXPECT_EQ(0u, TrackerSerNum)
+        << "Q3Tracker_GetPosition shall not overwrite TrackerSerNum when deactivated";
+    
+    // Move position by (1,1,1)
+    deltaPos.x = 1.0f;
+    deltaPos.y = 1.0f;
+    deltaPos.z = 1.0f;
+    Status3D = Q3Controller_MoveTrackerPosition(DriverController, &deltaPos);
+    EXPECT_Q3_SUCCESS(Status3D);
+    
+    // Get position via controller - should still be (0,0,0)
+    Status3D = Q3Controller_GetTrackerPosition(ClientController, &position);
+    EXPECT_Q3_SUCCESS(Status3D);
+    EXPECT_POINT3D_EQ(position, 0.0f, 0.0f, 0.0f);
+    // Position should remain (0,0,0) - move had no effect
+    
+    // Get position via tracker - should still be (0,0,0)
+    Status3D = Q3Tracker_GetPosition(ClientTracker, &position, &deltaPos, &changed, &TrackerSerNum);
+    EXPECT_Q3_SUCCESS(Status3D);
+    EXPECT_POINT3D_EQ(position, 0.0f, 0.0f, 0.0f);
+    EXPECT_VECTOR3D_EQ(deltaPos, 0.0f, 0.0f, 0.0f);
+    EXPECT_FALSE(changed)
+        << "changed should be kQ3False";
+    EXPECT_EQ(0u, TrackerSerNum)
+        << "Q3Tracker_GetPosition shall not overwrite TrackerSerNum when deactivated";
+}
+
+/**
+ * @brief test_039: Orientation with inactive tracker
+ * 
+ * Oracle behavior: When tracker is inactive:
+ * - GetOrientation should return identity quaternion (1,0,0,0)
+ * - SetTrackerOrientation should succeed but have no effect
+ * - MoveTrackerOrientation should succeed but have no effect
+ * - TrackerSerNum should remain 0
+ */
+TEST_F(ControllerCoreTestFixture, Test_039_Orientation_Inactive) {
+    // Note: controller and tracker are both inactive!
+    
+    // Get initial orientation
+    Status3D = Q3Tracker_GetOrientation(ClientTracker, &orientation, NULL, NULL, &TrackerSerNum);
+    EXPECT_Q3_SUCCESS(Status3D);
+    EXPECT_QUATERNION_EQ(orientation, 1.0f, 0.0f, 0.0f, 0.0f);
+    // Orientation should be identity (1,0,0,0)
+    EXPECT_EQ(0u, TrackerSerNum)
+        << "TrackerSerNum should be 0";
+    
+    // Set orientation to identity
+    Q3Quaternion_SetIdentity(&orientation);
+    Status3D = Q3Controller_SetTrackerOrientation(DriverController, &orientation);
+    EXPECT_Q3_SUCCESS(Status3D);
+    
+    // Get orientation via controller
+    Status3D = Q3Controller_GetTrackerOrientation(ClientController, &orientation);
+    EXPECT_Q3_SUCCESS(Status3D);
+    EXPECT_QUATERNION_EQ(orientation, 1.0f, 0.0f, 0.0f, 0.0f);
+    // Orientation should remain identity
+    
+    // Get orientation via tracker with delta
+    Status3D = Q3Tracker_GetOrientation(ClientTracker, &orientation, &deltaOri, &changed, &TrackerSerNum);
+    EXPECT_Q3_SUCCESS(Status3D);
+    EXPECT_QUATERNION_EQ(orientation, 1.0f, 0.0f, 0.0f, 0.0f);
+    EXPECT_QUATERNION_EQ(deltaOri, 1.0f, 0.0f, 0.0f, 0.0f);
+    // deltaOri should be identity
+    EXPECT_FALSE(changed)
+        << "changed should be kQ3False";
+    EXPECT_EQ(0u, TrackerSerNum);
+    
+    // Move orientation by 45-degree Y rotation
+    Q3Quaternion_SetRotate_Y(&deltaOri, 45); // deltaOri = -0.8733047,0,-0.4871745,0
+    Status3D = Q3Controller_MoveTrackerOrientation(DriverController, &deltaOri);
+    EXPECT_Q3_SUCCESS(Status3D);
+    
+    // Get orientation via controller - should still be identity
+    Status3D = Q3Controller_GetTrackerOrientation(ClientController, &orientation);
+    EXPECT_Q3_SUCCESS(Status3D);
+    EXPECT_QUATERNION_EQ(orientation, 1.0f, 0.0f, 0.0f, 0.0f);
+    // Orientation should remain identity - move had no effect
+    
+    // Get orientation via tracker - should still be identity
+    Status3D = Q3Tracker_GetOrientation(ClientTracker, &orientation, &deltaOri, &changed, &TrackerSerNum);
+    EXPECT_Q3_SUCCESS(Status3D);
+    EXPECT_QUATERNION_EQ(orientation, 1.0f, 0.0f, 0.0f, 0.0f);
+    EXPECT_QUATERNION_EQ(deltaOri, 1.0f, 0.0f, 0.0f, 0.0f);
+    // deltaOri should remain identity
+    EXPECT_FALSE(changed)
+        << "changed should be kQ3False";
+    EXPECT_EQ(0u, TrackerSerNum);
+}
+
+/**
+ * @brief test_040: Controller values with inactive state
+ * 
+ * Oracle behavior: When controller is inactive:
+ * - GetValues should return last active values (5.0, -5.0)
+ * - SetValues should succeed
+ * - GetValues should return new values (3.0, -3.0)
+ * - changed flag should be kQ3False (inactive - no change notification)
+ * - CtrlSerNum should remain 3 (ambitious - not incremented when inactive)
+ */
+TEST_F(ControllerCoreTestFixture, Test_040_Values_Inactive) {
+    // Get initial values - should be (5.0, -5.0) from test_030
+    Status3D = Q3Controller_GetValues(ClientController, 2, values, NULL, &CtrlSerNum);
+    EXPECT_Q3_SUCCESS(Status3D);
+    EXPECT_FLOAT_EQ(5.0f, values[0]) << "values[0] should be 5.0";
+    EXPECT_FLOAT_EQ(-5.0f, values[1]) << "values[1] should be -5.0";
+    EXPECT_EQ(3u, CtrlSerNum) << "CtrlSerNum should be 3";
+    
+    // Set new values
+    values[0] = 3.0f;
+    values[1] = -3.0f;
+    Status3D = Q3Controller_SetValues(DriverController, values, 2);
+    EXPECT_Q3_SUCCESS(Status3D);
+    
+    // Get values with changed flag
+    changed = kQ3True;
+    Status3D = Q3Controller_GetValues(ClientController, 2, values, &changed, &CtrlSerNum);
+    EXPECT_Q3_SUCCESS(Status3D);
+    EXPECT_FLOAT_EQ(3.0f, values[0]) << "values[0] should be 3.0 (overwritten)";
+    EXPECT_FLOAT_EQ(-3.0f, values[1]) << "values[1] should be -3.0 (overwritten)";
+    EXPECT_FALSE(changed)
+        << "changed flag should be kQ3False (overwritten - inactive controller)";
+#if 1
+    EXPECT_EQ(3u, CtrlSerNum)
+        << "CtrlSerNum should remain 3 (ambitious - not incremented when inactive)";
+#else
+    EXPECT_EQ(4u, CtrlSerNum)
+        << "Alternative: CtrlSerNum should be 4 (ambitious)";
+#endif
+}
+
+/**
+ * @brief test_041: Controller decommission
+ * 
+ * Oracle behavior: Test Q3Controller_Decommission comprehensively.
+ * When a controller is decommissioned:
+ * - Activation should be kQ3False
+ * - HasTracker should be kQ3False
+ * - Signature should be empty string (QD3D) or "reasonable default value" (Quesa - ambitious)
+ * - ValueCount should be 0
+ * - Buttons should be 0
+ * - Position should be (0,0,0)
+ * - Orientation should be identity (1,0,0,0)
+ * - Values should NOT be overwritten
+ * - CtrlSerNum should be 0 (QD3D) or 4 (Quesa - ambitious)
+ * 
+ * Oracle note: "TODO: what happens to assigned tracker?"
+ */
+TEST_F(ControllerCoreTestFixture, Test_041_Decommission) {
+    // Controller decommissioned
+    
+    // Decommission controller
+    Status3D = Q3Controller_Decommission(DriverController);
+    // TODO: what happens to assigned tracker?
+    EXPECT_Q3_SUCCESS(Status3D);
+    
+    // Check activation - should be false
+    Status3D = Q3Controller_GetActivation(ClientController, &controllerActivation);
+    EXPECT_Q3_SUCCESS(Status3D);
+    EXPECT_FALSE(controllerActivation)
+        << "controllerActivation should be kQ3False after decommission";
+    
+    // Check tracker - should not have tracker
+    Status3D = Q3Controller_HasTracker(DriverController, &tempBool);
+    EXPECT_Q3_SUCCESS(Status3D);
+    EXPECT_FALSE(tempBool)
+        << "Controller should not have tracker after decommission";
+    
+    // Check signature (truncated) - should be empty
+    Status3D = Q3Controller_GetSignature(ClientController, tempString, 5);
+    EXPECT_Q3_SUCCESS(Status3D);
+#if 1
+    EXPECT_EQ(0u, strlen(tempString))
+        << "Signature should be empty string after decommission";
+#else
+    EXPECT_STREQ("com.", tempString)
+        << "Ambitious pass: Quesa returns signature even when the controller is "
+        << "decommissioned: 'reasonable default value'";
+#endif
+    
+    // Check signature (full) - should be empty
+    Status3D = Q3Controller_GetSignature(ClientController, tempString, 128);
+    EXPECT_Q3_SUCCESS(Status3D);
+#if 1
+    EXPECT_EQ(0u, strlen(tempString))
+        << "Full signature should be empty string after decommission";
+#else
+    EXPECT_STREQ("com.HMDP.BenchController", tempString)
+        << "Ambitious pass: Quesa returns signature even when the controller is "
+        << "decommissioned: 'reasonable default value'";
+#endif
+    
+    // Check value count - should be 0
+    Status3D = Q3Controller_GetValueCount(ClientController, &tempUns32);
+    EXPECT_Q3_SUCCESS(Status3D);
+    EXPECT_EQ(0u, tempUns32)
+        << "ValueCount should be 0 after decommission";
+    
+    // Check buttons - should be 0
+    Status3D = Q3Tracker_GetButtons(ClientTracker, &tempUns32);
+    EXPECT_Q3_SUCCESS(Status3D);
+    EXPECT_EQ(0u, tempUns32)
+        << "Buttons should be 0 after decommission";
+    
+    // Check position - should be (0,0,0)
+    Status3D = Q3Controller_GetTrackerPosition(ClientController, &position);
+    EXPECT_Q3_SUCCESS(Status3D);
+    EXPECT_POINT3D_EQ(position, 0.0f, 0.0f, 0.0f);
+    // Position should be (0,0,0) after decommission
+    
+    // Check orientation - should be identity
+    Status3D = Q3Controller_GetTrackerOrientation(ClientController, &orientation);
+    EXPECT_Q3_SUCCESS(Status3D);
+    EXPECT_QUATERNION_EQ(orientation, 1.0f, 0.0f, 0.0f, 0.0f);
+    // Orientation should be identity (1,0,0,0) after decommission
+    
+    // Check values - should NOT be overwritten
+    CtrlSerNum = 0;
+    values[0] = +5.0f;
+    values[1] = -5.0f;
+    Status3D = Q3Controller_GetValues(ClientController, 2, values, NULL, &CtrlSerNum);
+    EXPECT_Q3_SUCCESS(Status3D);
+    EXPECT_FLOAT_EQ(+5.0f, values[0])
+        << "values[0] should NOT be overwritten (should remain +5)";
+    EXPECT_FLOAT_EQ(-5.0f, values[1])
+        << "values[1] should NOT be overwritten (should remain -5)";
+#if 1
+    EXPECT_EQ(0u, CtrlSerNum)
+        << "CtrlSerNum should be 0 after decommission";
+#else
+    EXPECT_EQ(4u, CtrlSerNum)
+        << "Ambitious: CtrlSerNum should be 4";
+#endif
+}
+
+/**
+ * @brief test_042: Re-create controller after decommission
+ * 
+ * Oracle behavior: After decommissioning, should be able to create a new controller.
+ * Q3Controller_Next should find the new controller.
+ */
+TEST_F(ControllerCoreTestFixture, Test_042_RecreateController) {
+    // Controller re-new
+    DriverController = Q3Controller_New(&ControllerData);
+    EXPECT_NE(nullptr, DriverController)
+        << "DriverController should not be NULL after re-creation";
+    
+    // Check that controller is available
+    Status3D = Q3Controller_Next(NULL, &tempController);
+    EXPECT_Q3_SUCCESS(Status3D);
+    EXPECT_NE(nullptr, tempController)
+        << "Controller should be available after re-creation";
+}
+
+/**
+ * @brief test_043: Dispose tracker and controller state
+ * 
+ * Oracle behavior: Clean up resources.
+ * Dispose tracker and controller state objects.
+ * 
+ * Oracle notes:
+ * - "done: check/review of Tracker Dispose"
+ * - "done: check/review of OS X Quesa cleanup"
+ */
+TEST_F(ControllerCoreTestFixture, Test_043_DisposeResources) {
+    // Dispose tracker
+    Q3Object_Dispose(ClientTracker);
+    // done: check/review of Tracker Dispose
+    
+    // Dispose controller state
+    Q3Object_Dispose(ControllerState);
+    // done: check/review of OS X Quesa cleanup
+    
+    // No assertions - just cleanup
+    SUCCEED() << "Resources disposed successfully";
+}
+
 // ============================================================================
-// Additional tests will be added here in sequential order
-// test_031 through test_043, plus repeated tests
+// Repeated Tests (from original oracle)
+// The oracle runs test_006, test_018, and test_019 again after test_042
+// ============================================================================
+
+/**
+ * @brief Repeat test_006: Controller enumeration (2nd time)
+ * 
+ * Oracle behavior: Same as test_006, verifying controller enumeration still works
+ * after decommission and re-creation.
+ */
+TEST_F(ControllerCoreTestFixture, Test_044_Rerun_006_ControllerNext) {
+    Status3D = Q3Controller_Next(NULL, &ClientController);
+    
+    EXPECT_Q3_SUCCESS(Status3D);
+    
+    EXPECT_PLATFORM_CONTROLLER_EQUALITY(ClientController, DriverController);
+}
+
+/**
+ * @brief Repeat test_018: Get controller signature (2nd time)
+ * 
+ * Oracle behavior: Same as test_018, verifying signature retrieval after
+ * decommission and re-creation.
+ */
+TEST_F(ControllerCoreTestFixture, Test_045_Rerun_018_GetSignature) {
+    // Test with small buffer (5 bytes)
+    Status3D = Q3Controller_GetSignature(ClientController, tempString, 5);
+    EXPECT_Q3_SUCCESS(Status3D);
+    EXPECT_STREQ("com.", tempString)
+        << "Signature with buffer size 5 should return 'com.'";
+    
+    // Test with full buffer (128 bytes)
+    Status3D = Q3Controller_GetSignature(ClientController, tempString, 128);
+    EXPECT_Q3_SUCCESS(Status3D);
+    EXPECT_STREQ("com.HMDP.BenchController", tempString)
+        << "Full signature should be 'com.HMDP.BenchController'";
+}
+
+/**
+ * @brief Repeat test_019: Get controller value count (2nd time)
+ * 
+ * Oracle behavior: Same as test_019, verifying value count retrieval after
+ * decommission and re-creation.
+ */
+TEST_F(ControllerCoreTestFixture, Test_046_Rerun_019_GetValueCount) {
+    Status3D = Q3Controller_GetValueCount(ClientController, &tempUns32);
+    
+    EXPECT_Q3_SUCCESS(Status3D);
+    EXPECT_EQ(16u, tempUns32)
+        << "ValueCount should be 16 (as set in controller re-creation)";
+}
+
+/**
+ * @brief Final test: Repeat test_043 (final cleanup)
+ * 
+ * Oracle behavior: The original oracle ends with test_043 being called again.
+ * This is the final cleanup.
+ */
+TEST_F(ControllerCoreTestFixture, Test_047_Final_Cleanup) {
+    // Note: In the original oracle, test_043 is called again at the very end
+    // This appears to be a final cleanup step
+    
+    // The fixture's TearDownTestSuite will handle final cleanup
+    SUCCEED() << "All tests completed - final cleanup will be handled by fixture";
+}
+
+// ============================================================================
+// END OF TESTS
+// All 47 test runs complete (44 unique tests + 3 repeats)
 // ============================================================================
 

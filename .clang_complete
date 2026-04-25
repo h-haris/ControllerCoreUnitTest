@@ -1,0 +1,14 @@
+-DBenchX=1
+-DQUESA_OS_MACINTOSH=1
+-DQ3_DEBUG=1
+-std=c++14
+-I${QUESA_FRAMEWORK}/Headers
+-I../build/Release/Quesa.framework/Headers
+-I../build/Debug/Quesa.framework/Headers
+-I${HOME}/Library/Developer/Xcode/DerivedData/Quesa-*/Build/Products/Release/Quesa.framework/Headers
+-I${HOME}/Library/Developer/Xcode/DerivedData/Quesa-*/Build/Products/Debug/Quesa.framework/Headers
+-F../build/Release
+-F../build/Debug
+-F${HOME}/Library/Developer/Xcode/DerivedData/Quesa-*/Build/Products/Release
+-F${HOME}/Library/Developer/Xcode/DerivedData/Quesa-*/Build/Products/Debug
+
