@@ -6,30 +6,33 @@
 #ifndef CONTROLLER_TEST_FIXTURE_H
 #define CONTROLLER_TEST_FIXTURE_H
 
+// Note: gtest/gtest.h is provided by CMake via FetchContent
+// Run: ./build.sh or cmake to configure and download Google Test
 #include <gtest/gtest.h>
 #include <cmath>
 #include <cstring>
 #include <iostream>
 
 // Include appropriate headers based on platform
-#ifdef BenchX
-    // For Quesa
-    #ifndef QUESA_OS_MACINTOSH
-    #define QUESA_OS_MACINTOSH 1
-    #endif
-
-    #ifndef Q3_DEBUG
-    #define Q3_DEBUG 1
-    #endif
-
-    #include <Quesa/Quesa.h>
-    #include <Quesa/QuesaController.h>
-    #include <Quesa/QuesaMath.h>
-#else
-    #include <QD3D.h>
-    #include <QD3DController.h>
-    #include <QD3DMath.h>
+// This test suite is for QUESA ONLY - not legacy QuickDraw 3D
+// Legacy QD3D headers (QD3D.h) cannot be used on modern macOS
+#if !defined(BenchX)
+    // If BenchX is not defined, assume Quesa (CMake will define this)
+    #define BenchX 1
 #endif
+
+// Always use Quesa headers (not legacy QD3D)
+#ifndef QUESA_OS_MACINTOSH
+#define QUESA_OS_MACINTOSH 1
+#endif
+
+#ifndef Q3_DEBUG
+#define Q3_DEBUG 1
+#endif
+
+#include <Quesa/Quesa.h>
+#include <Quesa/QuesaController.h>
+#include <Quesa/QuesaMath.h>
 
 // ============================================================================
 // Test Fixture Class
