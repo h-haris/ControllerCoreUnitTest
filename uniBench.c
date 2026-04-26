@@ -19,7 +19,6 @@
 #endif
 
 #include <Quesa/Quesa.h>
-//#include "Quesa/Quesa.h"
 #include <Quesa/QuesaController.h>
 #include <Quesa/QuesaMath.h>
 #else

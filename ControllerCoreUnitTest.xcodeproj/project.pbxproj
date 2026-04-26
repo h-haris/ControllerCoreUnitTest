@@ -32,7 +32,6 @@
 		6548471C1702469C00A0D584 /* uniBench.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = uniBench.c; sourceTree = "<group>"; };
 		7F983F04239FD48900B4977A /* uniBench.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uniBench.h; sourceTree = "<group>"; };
 		7F983F05239FD48900B4977A /* minunit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = minunit.h; sourceTree = "<group>"; };
-		7F983F08239FD75700B4977A /* Quesa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Quesa.framework; path = ../../../../Library/Frameworks/Quesa.framework; sourceTree = "<group>"; };
 		7FAD84682636EC2B005B0EED /* Quesa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Quesa.framework; path = ../Quesa/SDK/Libraries/Mac/Framework_Modern/Debug/Quesa.framework; sourceTree = "<group>"; };
 		7FB16C482F969C7000CE3449 /* testsControllerTestFixture.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = testsControllerTestFixture.h; sourceTree = "<group>"; };
 		7FB16C492F969C7F00CE3449 /* testsControllerTestHelpers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = testsControllerTestHelpers.h; sourceTree = "<group>"; };
@@ -89,7 +88,6 @@
 			children = (
 				7FAD84682636EC2B005B0EED /* Quesa.framework */,
 				654846FE1702468A00A0D584 /* Cocoa.framework */,
-				7F983F08239FD75700B4977A /* Quesa.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -217,6 +215,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
@@ -270,6 +269,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
@@ -324,9 +324,9 @@
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "ControllerCoreUnitTest/ControllerCoreUnitTest-Prefix.pch";
-				HEADER_SEARCH_PATHS = "";
+				HEADER_SEARCH_PATHS = /usr/local/include;
 				INFOPLIST_FILE = "ControllerCoreUnitTest/ControllerCoreUnitTest-Info.plist";
-				LIBRARY_SEARCH_PATHS = "";
+				LIBRARY_SEARCH_PATHS = /usr/local/lib;
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "HMDP.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -348,9 +348,9 @@
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "ControllerCoreUnitTest/ControllerCoreUnitTest-Prefix.pch";
-				HEADER_SEARCH_PATHS = "";
+				HEADER_SEARCH_PATHS = /usr/local/include;
 				INFOPLIST_FILE = "ControllerCoreUnitTest/ControllerCoreUnitTest-Info.plist";
-				LIBRARY_SEARCH_PATHS = "";
+				LIBRARY_SEARCH_PATHS = /usr/local/lib;
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "HMDP.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";

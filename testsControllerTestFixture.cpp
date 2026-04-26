@@ -127,40 +127,23 @@ TQ3Status ControllerCoreTestFixture::ChannelGetMethod(
     void *data,
     TQ3Uns32 *dataSize)
 {
-    (void)controllerRef; // Unused parameter
-    
-    // Track which channel was accessed
-    what_work = channel;
-    
-    // Validate parameters
+    (void)controllerRef;
+
     if (data == nullptr || dataSize == nullptr) {
         return kQ3Failure;
     }
-    
-    // Handle different channel types
+
+    // Note: what0 and what1 are intentionally crossed (matches oracle uniBench.c)
+    TQ3Status status = kQ3Success;
     switch (channel) {
-        case 0: // whatGet channel
-            if (*dataSize >= sizeof(TQ3Uns32)) {
-                *((TQ3Uns32*)data) = whatGet;
-                *dataSize = sizeof(TQ3Uns32);
-                return kQ3Success;
-            }
-            break;
-            
-        case 1: // whatSize channel
-            if (*dataSize >= sizeof(TQ3Uns32)) {
-                *((TQ3Uns32*)data) = whatSize;
-                *dataSize = sizeof(TQ3Uns32);
-                return kQ3Success;
-            }
-            break;
-            
-        default:
-            // Unknown channel
-            return kQ3Failure;
+        case 0: *((TQ3Uns32*)data) = what1; break;         // crossed!
+        case 1: *((TQ3Uns32*)data) = what0; break;         // crossed!
+        case 2: *((TQ3Uns32*)data) = lastsize; break;
+        case 3: *((TQ3Uns32*)data) = what_work; status = kQ3Failure; break;
+        default: *((TQ3Uns32*)data) = 65000; status = kQ3Failure; break;
     }
-    
-    return kQ3Failure;
+    *dataSize = sizeof(TQ3Uns32);
+    return status;
 }
 
 TQ3Status ControllerCoreTestFixture::ChannelSetMethod(
@@ -169,40 +152,17 @@ TQ3Status ControllerCoreTestFixture::ChannelSetMethod(
     const void *data,
     TQ3Uns32 dataSize)
 {
-    (void)controllerRef; // Unused parameter
-    
-    // Track which channel was accessed
-    what_work = channel;
+    (void)controllerRef;
+
     lastsize = dataSize;
-    
-    // Validate parameters
-    if (data == nullptr) {
-        return kQ3Failure;
-    }
-    
-    // Handle different channel types
+
     switch (channel) {
-        case 0: // whatSet channel
-            if (dataSize >= sizeof(TQ3Uns32)) {
-                whatSet = *((const TQ3Uns32*)data);
-                what0 = whatSet;
-                return kQ3Success;
-            }
-            break;
-            
-        case 1: // Additional channel
-            if (dataSize >= sizeof(TQ3Uns32)) {
-                what1 = *((const TQ3Uns32*)data);
-                return kQ3Success;
-            }
-            break;
-            
-        default:
-            // Unknown channel
-            return kQ3Failure;
+        case 0: what0 = data ? *((const TQ3Uns32*)data) : 0; break;
+        case 1: what1 = data ? *((const TQ3Uns32*)data) : 0; break;
+        case 3: what_work = data ? *((const TQ3Uns32*)data) : 0; break;
+        default: break;
     }
-    
-    return kQ3Failure;
+    return kQ3Success;
 }
 
 TQ3Status ControllerCoreTestFixture::TrackerProc(
