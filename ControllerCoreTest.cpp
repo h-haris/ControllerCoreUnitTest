@@ -1561,7 +1561,284 @@ TEST_F(ControllerCoreTestFixture, Test_047_Final_Cleanup) {
 }
 
 // ============================================================================
+// Tests 048–057: Additional coverage for Q3Tracker_* direct API and
+// behavioural gaps identified against the QD3D manual (Chapter 18).
+// State entering Test_048: DriverController == ClientController (active,
+// recommissioned in Test_042); ClientTracker == nullptr.
+// ============================================================================
+
+/**
+ * @brief Test_048: Q3Tracker_ChangeButtons — buttonMask behaviour
+ *
+ * Creates a fresh tracker, activates it, associates the controller, then
+ * verifies that ChangeButtons applies the mask correctly:
+ *   - only bits covered by buttonMask are modified
+ *   - bits outside the mask are preserved
+ */
+TEST_F(ControllerCoreTestFixture, Test_048_ChangeButtons) {
+    // Create and activate a fresh tracker for tests 048-057
+    ClientTracker = Q3Tracker_New(TrackerProc);
+    ASSERT_NE(nullptr, ClientTracker) << "ClientTracker must not be NULL";
+
+    Status3D = Q3Tracker_SetActivation(ClientTracker, kQ3True);
+    EXPECT_Q3_SUCCESS(Status3D);
+
+    // Re-activate the controller (was inactive since Test_033 branch)
+    Status3D = Q3Controller_SetActivation(DriverController, kQ3True);
+    EXPECT_Q3_SUCCESS(Status3D);
+
+    Status3D = Q3Controller_SetTracker(DriverController, ClientTracker);
+    EXPECT_Q3_SUCCESS(Status3D);
+
+    // 1) Set bits 0 and 1 via mask 0x3
+    Status3D = Q3Tracker_ChangeButtons(ClientTracker, DriverController, 0x3u, 0x3u);
+    EXPECT_Q3_SUCCESS(Status3D);
+
+    Status3D = Q3Tracker_GetButtons(ClientTracker, &tempUns32);
+    EXPECT_Q3_SUCCESS(Status3D);
+    EXPECT_EQ(0x3u, tempUns32) << "Buttons should be 0b011 after setting bits 0+1";
+
+    // 2) Add bit 2 (mask covers only bit 2; bits 0,1 should be preserved)
+    Status3D = Q3Tracker_ChangeButtons(ClientTracker, DriverController, 0x4u, 0x4u);
+    EXPECT_Q3_SUCCESS(Status3D);
+
+    Status3D = Q3Tracker_GetButtons(ClientTracker, &tempUns32);
+    EXPECT_Q3_SUCCESS(Status3D);
+    EXPECT_EQ(0x7u, tempUns32) << "Buttons should be 0b111 after adding bit 2";
+
+    // 3) Clear bit 0 (mask=0x1, buttons=0 → bit 0 set to 0; bits 1,2 preserved)
+    Status3D = Q3Tracker_ChangeButtons(ClientTracker, DriverController, 0x0u, 0x1u);
+    EXPECT_Q3_SUCCESS(Status3D);
+
+    Status3D = Q3Tracker_GetButtons(ClientTracker, &tempUns32);
+    EXPECT_Q3_SUCCESS(Status3D);
+    EXPECT_EQ(0x6u, tempUns32) << "Buttons should be 0b110 after clearing bit 0";
+}
+
+/**
+ * @brief Test_049: Q3Tracker_SetPosition — direct tracker API
+ *
+ * Spec (p. 1135): sets the tracker's position; has no effect when inactive.
+ */
+TEST_F(ControllerCoreTestFixture, Test_049_Tracker_SetPosition) {
+    position.x = 3.0f; position.y = 0.0f; position.z = 0.0f;
+
+    Status3D = Q3Tracker_SetPosition(ClientTracker, DriverController, &position);
+    EXPECT_Q3_SUCCESS(Status3D);
+
+    // Verify via Q3Tracker_GetPosition
+    TQ3Point3D readPos = {0.0f, 0.0f, 0.0f};
+    Status3D = Q3Tracker_GetPosition(ClientTracker, &readPos, nullptr, nullptr, nullptr);
+    EXPECT_Q3_SUCCESS(Status3D);
+    EXPECT_POINT3D_EQ(readPos, 3.0f, 0.0f, 0.0f);
+}
+
+/**
+ * @brief Test_050: Q3Tracker_MovePosition — direct tracker API
+ *
+ * Spec (p. 1136): adds delta to the current tracker position.
+ */
+TEST_F(ControllerCoreTestFixture, Test_050_Tracker_MovePosition) {
+    deltaPos.x = 1.0f; deltaPos.y = 1.0f; deltaPos.z = 0.0f;
+
+    Status3D = Q3Tracker_MovePosition(ClientTracker, DriverController, &deltaPos);
+    EXPECT_Q3_SUCCESS(Status3D);
+
+    // Position should now be (3+1, 0+1, 0) = (4, 1, 0)
+    TQ3Point3D readPos = {0.0f, 0.0f, 0.0f};
+    Status3D = Q3Tracker_GetPosition(ClientTracker, &readPos, nullptr, nullptr, nullptr);
+    EXPECT_Q3_SUCCESS(Status3D);
+    EXPECT_POINT3D_EQ(readPos, 4.0f, 1.0f, 0.0f);
+}
+
+/**
+ * @brief Test_051: Q3Tracker_SetOrientation — direct tracker API
+ *
+ * Spec (p. 1138): sets the tracker's orientation.
+ */
+TEST_F(ControllerCoreTestFixture, Test_051_Tracker_SetOrientation) {
+    // 90-degree rotation around Y (π/2 radians)
+    Q3Quaternion_SetRotate_Y(&orientation, (float)M_PI / 2.0f);
+
+    Status3D = Q3Tracker_SetOrientation(ClientTracker, DriverController, &orientation);
+    EXPECT_Q3_SUCCESS(Status3D);
+
+    TQ3Quaternion readOri = {1.0f, 0.0f, 0.0f, 0.0f};
+    Status3D = Q3Tracker_GetOrientation(ClientTracker, &readOri, nullptr, nullptr, nullptr);
+    EXPECT_Q3_SUCCESS(Status3D);
+
+    // cos(π/4) ≈ 0.7071, sin(π/4) ≈ 0.7071
+    EXPECT_QUATERNION_NEAR(readOri, (float)cos(M_PI / 4.0), 0.0f, (float)sin(M_PI / 4.0), 0.0f);
+}
+
+/**
+ * @brief Test_052: Q3Tracker_MoveOrientation — direct tracker API
+ *
+ * Spec (p. 1139): multiplies the current orientation by delta.
+ * Two successive π/2-Y rotations produce a π rotation around Y → (0, 0, 1, 0).
+ */
+TEST_F(ControllerCoreTestFixture, Test_052_Tracker_MoveOrientation) {
+    // Rotate by another π/2 around Y on top of Test_051's result
+    Q3Quaternion_SetRotate_Y(&deltaOri, (float)M_PI / 2.0f);
+
+    Status3D = Q3Tracker_MoveOrientation(ClientTracker, DriverController, &deltaOri);
+    EXPECT_Q3_SUCCESS(Status3D);
+
+    TQ3Quaternion readOri = {1.0f, 0.0f, 0.0f, 0.0f};
+    Status3D = Q3Tracker_GetOrientation(ClientTracker, &readOri, nullptr, nullptr, nullptr);
+    EXPECT_Q3_SUCCESS(Status3D);
+
+    // π rotation around Y → (w=0, x=0, y=1, z=0)
+    EXPECT_QUATERNION_NEAR(readOri, 0.0f, 0.0f, 1.0f, 0.0f);
+}
+
+/**
+ * @brief Test_053: Q3Tracker_New(NULL) — polling mode (no notify function)
+ *
+ * Spec (p. 1128): passing NULL for notifyFunc creates a tracker that must
+ * be polled rather than notified.  Verifies that GetPosition returns the
+ * updated position after a controller move.
+ */
+TEST_F(ControllerCoreTestFixture, Test_053_Tracker_New_Polling) {
+    TQ3TrackerObject pollingTracker = Q3Tracker_New(nullptr);
+    ASSERT_NE(nullptr, pollingTracker) << "Polling tracker (no notify func) must not be NULL";
+
+    Status3D = Q3Tracker_SetActivation(pollingTracker, kQ3True);
+    EXPECT_Q3_SUCCESS(Status3D);
+
+    // Temporarily associate controller with the polling tracker
+    Status3D = Q3Controller_SetTracker(DriverController, pollingTracker);
+    EXPECT_Q3_SUCCESS(Status3D);
+
+    // Move the polling tracker's position
+    TQ3Vector3D moveVec = {2.0f, 0.0f, 0.0f};
+    Status3D = Q3Controller_MoveTrackerPosition(DriverController, &moveVec);
+    EXPECT_Q3_SUCCESS(Status3D);
+
+    // Poll — no notification was fired, but GetPosition should reflect the move
+    TQ3Point3D polledPos = {0.0f, 0.0f, 0.0f};
+    TQ3Boolean polledChanged = kQ3False;
+    TQ3Uns32 pollSN = 0;
+    Status3D = Q3Tracker_GetPosition(pollingTracker, &polledPos, nullptr, &polledChanged, &pollSN);
+    EXPECT_Q3_SUCCESS(Status3D);
+    EXPECT_FLOAT_EQ(2.0f, polledPos.x) << "Polled position x should be 2.0";
+    EXPECT_TRUE(polledChanged) << "Changed should be kQ3True (new serial vs 0)";
+
+    // Restore controller → ClientTracker
+    Status3D = Q3Controller_SetTracker(DriverController, ClientTracker);
+    EXPECT_Q3_SUCCESS(Status3D);
+
+    Q3Object_Dispose(pollingTracker);
+}
+
+/**
+ * @brief Test_054: Q3Tracker_GetPosition with delta=NULL
+ *
+ * Spec (p. 1135): when delta is NULL the function still fills in position and
+ * returns kQ3True in changed when serialNumber is NULL.
+ */
+TEST_F(ControllerCoreTestFixture, Test_054_GetPosition_DeltaNULL) {
+    // Move position so there is something to report
+    TQ3Vector3D moveVec = {1.0f, 0.0f, 0.0f};
+    Status3D = Q3Controller_MoveTrackerPosition(DriverController, &moveVec);
+    EXPECT_Q3_SUCCESS(Status3D);
+
+    // Call with delta=NULL and serialNumber=NULL
+    TQ3Point3D readPos = {0.0f, 0.0f, 0.0f};
+    changed = kQ3False;
+    Status3D = Q3Tracker_GetPosition(ClientTracker, &readPos, nullptr, &changed, nullptr);
+    EXPECT_Q3_SUCCESS(Status3D);
+
+    // Position should include the move (previous was (4,1,0) after Test_050; +1 → (5,1,0))
+    EXPECT_FLOAT_EQ(5.0f, readPos.x) << "Position x should be 5.0 after move";
+    EXPECT_FLOAT_EQ(1.0f, readPos.y) << "Position y should be 1.0";
+
+    // Spec: serialNumber=NULL → changed must be kQ3True
+    EXPECT_TRUE(changed) << "changed should be kQ3True when serialNumber is NULL";
+}
+
+/**
+ * @brief Test_055: Q3Tracker_GetOrientation with delta=NULL
+ *
+ * Spec (p. 1137): when delta is NULL the function fills in orientation and
+ * returns kQ3True in changed when serialNumber is NULL.
+ */
+TEST_F(ControllerCoreTestFixture, Test_055_GetOrientation_DeltaNULL) {
+    // Call with delta=NULL and serialNumber=NULL
+    TQ3Quaternion readOri = {1.0f, 0.0f, 0.0f, 0.0f};
+    changed = kQ3False;
+    Status3D = Q3Tracker_GetOrientation(ClientTracker, &readOri, nullptr, &changed, nullptr);
+    EXPECT_Q3_SUCCESS(Status3D);
+
+    // Orientation should still be the π-rotation-around-Y set in Test_052
+    EXPECT_QUATERNION_NEAR(readOri, 0.0f, 0.0f, 1.0f, 0.0f);
+
+    // Spec: serialNumber=NULL → changed must be kQ3True
+    EXPECT_TRUE(changed) << "changed should be kQ3True when serialNumber is NULL";
+}
+
+/**
+ * @brief Test_056: Q3Controller_SetActivation increments controller list serial number
+ *
+ * Spec (p. 1112): "If the activation state of a controller is changed, the serial
+ * number of the list of available controllers is incremented."
+ */
+TEST_F(ControllerCoreTestFixture, Test_056_SetActivation_IncrementsList) {
+    // Capture current list serial number
+    TQ3Uns32 snBefore = 0;
+    Status3D = Q3Controller_GetListChanged(&controllerListChanged, &snBefore);
+    EXPECT_Q3_SUCCESS(Status3D);
+
+    // Deactivate → should increment list serial
+    Status3D = Q3Controller_SetActivation(DriverController, kQ3False);
+    EXPECT_Q3_SUCCESS(Status3D);
+
+    TQ3Uns32 snAfterDeactivate = snBefore;
+    Status3D = Q3Controller_GetListChanged(&controllerListChanged, &snAfterDeactivate);
+    EXPECT_Q3_SUCCESS(Status3D);
+    EXPECT_TRUE(controllerListChanged) << "List should have changed after SetActivation(false)";
+    EXPECT_GT(snAfterDeactivate, snBefore) << "List serial should be greater after deactivation";
+
+    // Reactivate → should increment again
+    Status3D = Q3Controller_SetActivation(DriverController, kQ3True);
+    EXPECT_Q3_SUCCESS(Status3D);
+
+    TQ3Uns32 snAfterReactivate = snAfterDeactivate;
+    Status3D = Q3Controller_GetListChanged(&controllerListChanged, &snAfterReactivate);
+    EXPECT_Q3_SUCCESS(Status3D);
+    EXPECT_TRUE(controllerListChanged) << "List should have changed after SetActivation(true)";
+    EXPECT_GT(snAfterReactivate, snAfterDeactivate) << "List serial should be greater after reactivation";
+}
+
+/**
+ * @brief Test_057: Q3Controller_GetValues with serialNumber=NULL
+ *
+ * Spec (p. 1124): "If the value of the serialNumber parameter is NULL,
+ * Q3Controller_GetValues fills in the values array and returns the value
+ * kQ3True in the changed parameter."
+ */
+TEST_F(ControllerCoreTestFixture, Test_057_GetValues_SerialNumberNULL) {
+    // Set known values first
+    values[0] = 7.0f;
+    values[1] = -7.0f;
+    Status3D = Q3Controller_SetValues(DriverController, values, 2);
+    EXPECT_Q3_SUCCESS(Status3D);
+
+    // Call GetValues with serialNumber=NULL
+    float readValues[2] = {0.0f, 0.0f};
+    changed = kQ3False;
+    Status3D = Q3Controller_GetValues(ClientController, 2, readValues, &changed, nullptr);
+    EXPECT_Q3_SUCCESS(Status3D);
+
+    EXPECT_FLOAT_EQ(7.0f,  readValues[0]) << "values[0] should be 7.0";
+    EXPECT_FLOAT_EQ(-7.0f, readValues[1]) << "values[1] should be -7.0";
+
+    // Spec: serialNumber=NULL → changed must be kQ3True
+    EXPECT_TRUE(changed) << "changed should be kQ3True when serialNumber is NULL";
+}
+
+// ============================================================================
 // END OF TESTS
-// All 47 test runs complete (44 unique tests + 3 repeats)
+// 58 test runs: Tests 000-047 (original oracle) + Tests 048-057 (API coverage)
 // ============================================================================
 
