@@ -1606,7 +1606,7 @@ TEST_F(ControllerCoreTestFixture, Test_048_ChangeButtons) {
     EXPECT_Q3_SUCCESS(Status3D);
     EXPECT_EQ(0x7u, tempUns32) << "Buttons should be 0b111 after adding bit 2";
 
-    // 3) Clear bit 0 (mask=0x1, buttons=0 → bit 0 set to 0; bits 1,2 preserved)
+    // 3) Clear bit 0 (mask=0x1, buttons=0 -> bit 0 set to 0; bits 1,2 preserved)
     Status3D = Q3Tracker_ChangeButtons(ClientTracker, DriverController, 0x0u, 0x1u);
     EXPECT_Q3_SUCCESS(Status3D);
 
@@ -1657,7 +1657,7 @@ TEST_F(ControllerCoreTestFixture, Test_050_Tracker_MovePosition) {
  * Spec (p. 1138): sets the tracker's orientation.
  */
 TEST_F(ControllerCoreTestFixture, Test_051_Tracker_SetOrientation) {
-    // 90-degree rotation around Y (π/2 radians)
+    // 90-degree rotation around Y (pi/2 radians)
     Q3Quaternion_SetRotate_Y(&orientation, (float)M_PI / 2.0f);
 
     Status3D = Q3Tracker_SetOrientation(ClientTracker, DriverController, &orientation);
@@ -1667,7 +1667,7 @@ TEST_F(ControllerCoreTestFixture, Test_051_Tracker_SetOrientation) {
     Status3D = Q3Tracker_GetOrientation(ClientTracker, &readOri, nullptr, nullptr, nullptr);
     EXPECT_Q3_SUCCESS(Status3D);
 
-    // cos(π/4) ≈ 0.7071, sin(π/4) ≈ 0.7071
+    // cos(pi/4) ≈ 0.7071, sin(pi/4) ≈ 0.7071
     EXPECT_QUATERNION_NEAR(readOri, (float)cos(M_PI / 4.0), 0.0f, (float)sin(M_PI / 4.0), 0.0f);
 }
 
@@ -1675,10 +1675,10 @@ TEST_F(ControllerCoreTestFixture, Test_051_Tracker_SetOrientation) {
  * @brief Test_052: Q3Tracker_MoveOrientation — direct tracker API
  *
  * Spec (p. 1139): multiplies the current orientation by delta.
- * Two successive π/2-Y rotations produce a π rotation around Y → (0, 0, 1, 0).
+ * Two successive pi/2-Y rotations produce a pi rotation around Y -> (0, 0, 1, 0).
  */
 TEST_F(ControllerCoreTestFixture, Test_052_Tracker_MoveOrientation) {
-    // Rotate by another π/2 around Y on top of Test_051's result
+    // Rotate by another pi/2 around Y on top of Test_051's result
     Q3Quaternion_SetRotate_Y(&deltaOri, (float)M_PI / 2.0f);
 
     Status3D = Q3Tracker_MoveOrientation(ClientTracker, DriverController, &deltaOri);
@@ -1688,7 +1688,7 @@ TEST_F(ControllerCoreTestFixture, Test_052_Tracker_MoveOrientation) {
     Status3D = Q3Tracker_GetOrientation(ClientTracker, &readOri, nullptr, nullptr, nullptr);
     EXPECT_Q3_SUCCESS(Status3D);
 
-    // π rotation around Y → (w=0, x=0, y=1, z=0)
+    // pi rotation around Y -> (w=0, x=0, y=1, z=0)
     EXPECT_QUATERNION_NEAR(readOri, 0.0f, 0.0f, 1.0f, 0.0f);
 }
 
@@ -1724,7 +1724,7 @@ TEST_F(ControllerCoreTestFixture, Test_053_Tracker_New_Polling) {
     EXPECT_FLOAT_EQ(2.0f, polledPos.x) << "Polled position x should be 2.0";
     EXPECT_TRUE(polledChanged) << "Changed should be kQ3True (new serial vs 0)";
 
-    // Restore controller → ClientTracker
+    // Restore controller -> ClientTracker
     Status3D = Q3Controller_SetTracker(DriverController, ClientTracker);
     EXPECT_Q3_SUCCESS(Status3D);
 
@@ -1749,11 +1749,11 @@ TEST_F(ControllerCoreTestFixture, Test_054_GetPosition_DeltaNULL) {
     Status3D = Q3Tracker_GetPosition(ClientTracker, &readPos, nullptr, &changed, nullptr);
     EXPECT_Q3_SUCCESS(Status3D);
 
-    // Position should include the move (previous was (4,1,0) after Test_050; +1 → (5,1,0))
+    // Position should include the move (previous was (4,1,0) after Test_050; +1 -> (5,1,0))
     EXPECT_FLOAT_EQ(5.0f, readPos.x) << "Position x should be 5.0 after move";
     EXPECT_FLOAT_EQ(1.0f, readPos.y) << "Position y should be 1.0";
 
-    // Spec: serialNumber=NULL → changed must be kQ3True
+    // Spec: serialNumber=NULL -> changed must be kQ3True
     EXPECT_TRUE(changed) << "changed should be kQ3True when serialNumber is NULL";
 }
 
@@ -1770,10 +1770,10 @@ TEST_F(ControllerCoreTestFixture, Test_055_GetOrientation_DeltaNULL) {
     Status3D = Q3Tracker_GetOrientation(ClientTracker, &readOri, nullptr, &changed, nullptr);
     EXPECT_Q3_SUCCESS(Status3D);
 
-    // Orientation should still be the π-rotation-around-Y set in Test_052
+    // Orientation should still be the pi-rotation-around-Y set in Test_052
     EXPECT_QUATERNION_NEAR(readOri, 0.0f, 0.0f, 1.0f, 0.0f);
 
-    // Spec: serialNumber=NULL → changed must be kQ3True
+    // Spec: serialNumber=NULL -> changed must be kQ3True
     EXPECT_TRUE(changed) << "changed should be kQ3True when serialNumber is NULL";
 }
 
@@ -1789,7 +1789,7 @@ TEST_F(ControllerCoreTestFixture, Test_056_SetActivation_IncrementsList) {
     Status3D = Q3Controller_GetListChanged(&controllerListChanged, &snBefore);
     EXPECT_Q3_SUCCESS(Status3D);
 
-    // Deactivate → should increment list serial
+    // Deactivate -> should increment list serial
     Status3D = Q3Controller_SetActivation(DriverController, kQ3False);
     EXPECT_Q3_SUCCESS(Status3D);
 
@@ -1799,7 +1799,7 @@ TEST_F(ControllerCoreTestFixture, Test_056_SetActivation_IncrementsList) {
     EXPECT_TRUE(controllerListChanged) << "List should have changed after SetActivation(false)";
     EXPECT_GT(snAfterDeactivate, snBefore) << "List serial should be greater after deactivation";
 
-    // Reactivate → should increment again
+    // Reactivate -> should increment again
     Status3D = Q3Controller_SetActivation(DriverController, kQ3True);
     EXPECT_Q3_SUCCESS(Status3D);
 
@@ -1833,7 +1833,7 @@ TEST_F(ControllerCoreTestFixture, Test_057_GetValues_SerialNumberNULL) {
     EXPECT_FLOAT_EQ(7.0f,  readValues[0]) << "values[0] should be 7.0";
     EXPECT_FLOAT_EQ(-7.0f, readValues[1]) << "values[1] should be -7.0";
 
-    // Spec: serialNumber=NULL → changed must be kQ3True
+    // Spec: serialNumber=NULL -> changed must be kQ3True
     EXPECT_TRUE(changed) << "changed should be kQ3True when serialNumber is NULL";
 }
 
