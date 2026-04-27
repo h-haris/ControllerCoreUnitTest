@@ -11,7 +11,6 @@
 		6548470F1702468A00A0D584 /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 6548470D1702468A00A0D584 /* Credits.rtf */; };
 		654847121702468A00A0D584 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 654847111702468A00A0D584 /* AppDelegate.m */; };
 		6548471F1702469C00A0D584 /* uniBench.c in Sources */ = {isa = PBXBuildFile; fileRef = 6548471C1702469C00A0D584 /* uniBench.c */; };
-		7FAD846C2636EC44005B0EED /* Quesa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7FAD84682636EC2B005B0EED /* Quesa.framework */; };
 		7FB16C4B2F969D2D00CE3449 /* ControllerCoreTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7FB16C4A2F969D2D00CE3449 /* ControllerCoreTest.cpp */; };
 		7FDE026B2F995B00000BB9B6 /* CMakeLists.txt in Resources */ = {isa = PBXBuildFile; fileRef = 7FDE026A2F995B00000BB9B6 /* CMakeLists.txt */; };
 		7FDE026F2F995B6D000BB9B6 /* build.sh in Resources */ = {isa = PBXBuildFile; fileRef = 7FDE026E2F995B6D000BB9B6 /* build.sh */; };
@@ -30,9 +29,9 @@
 		654847101702468A00A0D584 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		654847111702468A00A0D584 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		6548471C1702469C00A0D584 /* uniBench.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = uniBench.c; sourceTree = "<group>"; };
+		7F6D06CF2F9E8AD70049E65B /* Quesa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Quesa.framework; path = ../Quesa/SDK/Libraries/Mac/Framework_Modern/Debug/Quesa.framework; sourceTree = SOURCE_ROOT; };
 		7F983F04239FD48900B4977A /* uniBench.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uniBench.h; sourceTree = "<group>"; };
 		7F983F05239FD48900B4977A /* minunit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = minunit.h; sourceTree = "<group>"; };
-		7FAD84682636EC2B005B0EED /* Quesa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Quesa.framework; path = ../Quesa/SDK/Libraries/Mac/Framework_Modern/Debug/Quesa.framework; sourceTree = "<group>"; };
 		7FB16C482F969C7000CE3449 /* testsControllerTestFixture.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = testsControllerTestFixture.h; sourceTree = "<group>"; };
 		7FB16C492F969C7F00CE3449 /* testsControllerTestHelpers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = testsControllerTestHelpers.h; sourceTree = "<group>"; };
 		7FB16C4A2F969D2D00CE3449 /* ControllerCoreTest.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ControllerCoreTest.cpp; sourceTree = "<group>"; };
@@ -48,7 +47,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7FAD846C2636EC44005B0EED /* Quesa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -86,7 +84,7 @@
 		654846FD1702468A00A0D584 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				7FAD84682636EC2B005B0EED /* Quesa.framework */,
+				7F6D06CF2F9E8AD70049E65B /* Quesa.framework */,
 				654846FE1702468A00A0D584 /* Cocoa.framework */,
 			);
 			name = Frameworks;

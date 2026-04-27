@@ -1481,10 +1481,12 @@ TEST_F(ControllerCoreTestFixture, Test_042_RecreateController) {
 TEST_F(ControllerCoreTestFixture, Test_043_DisposeResources) {
     // Dispose tracker
     Q3Object_Dispose(ClientTracker);
+    ClientTracker = nullptr;
     // done: check/review of Tracker Dispose
 
     // Dispose controller state
     Q3Object_Dispose(ControllerState);
+    ControllerState = nullptr;
     // done: check/review of OS X Quesa cleanup
 
     // No assertions - just cleanup

@@ -135,13 +135,15 @@ TQ3Status ControllerCoreTestFixture::ChannelGetMethod(
 
     // Note: what0 and what1 are intentionally crossed (matches oracle uniBench.c)
     TQ3Status status = kQ3Success;
+    TQ3Uns32 result = 0;
     switch (channel) {
-        case 0: *((TQ3Uns32*)data) = what1; break;         // crossed!
-        case 1: *((TQ3Uns32*)data) = what0; break;         // crossed!
-        case 2: *((TQ3Uns32*)data) = lastsize; break;
-        case 3: *((TQ3Uns32*)data) = what_work; status = kQ3Failure; break;
-        default: *((TQ3Uns32*)data) = 65000; status = kQ3Failure; break;
+        case 0: result = what1; break;         // crossed!
+        case 1: result = what0; break;         // crossed!
+        case 2: result = lastsize; break;
+        case 3: result = what_work; status = kQ3Failure; break;
+        default: result = 65000; status = kQ3Failure; break;
     }
+    *((TQ3Uns32*)data) = result;
     *dataSize = sizeof(TQ3Uns32);
     return status;
 }
