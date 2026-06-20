@@ -2,6 +2,12 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "self:ControllerCoreUnitTest.xcodeproj">
+      location = "self:">
+   </FileRef>
+   <FileRef
+      location = "group:testsControllerTestFixture.h">
+   </FileRef>
+   <FileRef
+      location = "group:testsControllerTestFixture.cpp">
    </FileRef>
 </Workspace>
